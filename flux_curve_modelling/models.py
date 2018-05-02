@@ -9,11 +9,7 @@ def sigmoid(x, a, b):
     return 1 / (1 + np.exp(-a * x + b))
 
 
-def flux_curve_model(x, a, b):
-    return sigmoid(x, a, -b) - sigmoid(x, a, b)
-
-
-def normal_flux_curve_model(x, a, b):
+def subtracted_sigmoids(x, a, b):
     return sigmoid(x, a, -b) - sigmoid(x, a, b)
 
 
