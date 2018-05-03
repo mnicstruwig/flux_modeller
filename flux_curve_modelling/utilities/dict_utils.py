@@ -38,3 +38,30 @@ def update_apply_dict(dict_list, input_keys, output_key, func, **func_kwargs):
         sample[output_key] = result
 
     return dict_list
+
+
+def upsert_dict_list(dict_list, data, key):
+    """
+    Insert `data` into a list of dictionaries at a particular `key`.
+
+    Parameters
+    ----------
+    dict_list : list
+        List of dictionaries
+    data : array-like (n, d)
+        Data that must be inserted into each dict in `dict_list`. Each value of `n` will be upserted to correspond to
+        each index of `dict_list`. `n` must be equal to len(dict_list).
+    key : str
+        Key where data must be inserted.
+    Returns
+    -------
+    list
+        List of dicts with inserted data.
+    """
+
+    for i, x in enumerate(data):
+        sample = dict_list[i]
+        sample[key] = data[i:i + 1]
+
+        dict_list[i] = sample
+    return dict_list
