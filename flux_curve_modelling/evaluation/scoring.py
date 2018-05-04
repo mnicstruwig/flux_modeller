@@ -27,7 +27,7 @@ def score_regressors(regressors, scorer, X, y_expected):
     scores = []
     for i, reg in enumerate(regressors):
         prediction = reg.predict(X)
-        score = scorer(y_expected, prediction)
+        score = scorer(y_expected[:, i], prediction)
         scores.append(score)
 
     return scores

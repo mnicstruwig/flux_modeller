@@ -119,6 +119,10 @@ def create_training_sample(df, col, shift_peak_to_zero=True, smooth_filter=False
         Whether to shift the peak in df[col] to zero.
     smooth_filter : {False, True}
         Whether to smooth the flux-linkage waveform at df[col]
+    minmaxscale : {False, True}
+        Whether to apply a MinMaxScaler to the curve (i.e. scale curve to min=0 and max=1). If True, will also append
+        to the training sample dict under the 'minmaxscaler' key for later inverse-transformation back to original
+        curve.
 
     Returns
     -------
@@ -140,6 +144,8 @@ def create_training_sample(df, col, shift_peak_to_zero=True, smooth_filter=False
         index = _get_peak_index(new_df, 'flux_linkage', flipped=False)
         new_df['displacement(m)'] = _shift_index_value_to_zero(new_df, 'displacement(m)', index)
 
+    # MinMaxScaling
+    mms = None
     if minmaxscale:
         mms = MinMaxScaler()
         y_temp = new_df['flux_linkage']
@@ -148,6 +154,7 @@ def create_training_sample(df, col, shift_peak_to_zero=True, smooth_filter=False
 
     dict_ = get_parameters_dict(col, winding_diameter=0.127)
     dict_['dataframe'] = new_df
+    dict_['minmaxscaler'] = mms
 
     return dict_
 
