@@ -5,16 +5,16 @@ This file contains the models that are used to model the flux-linkage curves
 import numpy as np
 
 
-def sigmoid(x, a, b):
+def _sigmoid(x, a, b):
     return 1 / (1 + np.exp(-a * x + b))
 
 
 def subtracted_sigmoids(x, a, b):
-    return sigmoid(x, a, -b) - sigmoid(x, a, b)
+    return _sigmoid(x, a, -b) - _sigmoid(x, a, b)
 
 
 def d_sigmoid(x, C, a):
-    return C * sigmoid(x, a, b=0) * (1 - sigmoid(x, a, b=0))
+    return C * _sigmoid(x, a, b=0) * (1 - _sigmoid(x, a, b=0))
 
 
 def d_sigmoid_mod(x, C, a):

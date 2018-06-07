@@ -148,7 +148,7 @@ def create_training_sample(df, col, shift_peak_to_zero=True, smooth_filter=False
     mms = None
     if minmaxscale:
         mms = MinMaxScaler()
-        y_temp = new_df['flux_linkage']
+        y_temp = new_df['flux_linkage'].values
         y_temp = y_temp.reshape(-1, 1)
         new_df['flux_linkage'] = mms.fit_transform(y_temp)
 

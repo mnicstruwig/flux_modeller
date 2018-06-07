@@ -119,10 +119,12 @@ def get_x_y_from_dict_list(dict_list, additional_features):
             sample['winding_num_r'],
             sample['winding_num_z']
         ]
-        features_dict = engineer_features(additional_features, **sample)
 
-        for key, value in features_dict.items():
-            x.append(value)
+        if additional_features is not None:
+            features_dict = engineer_features(additional_features, **sample)
+
+            for key, value in features_dict.items():
+                x.append(value)
 
         X.append(x)
         y.append(sample['popt'])

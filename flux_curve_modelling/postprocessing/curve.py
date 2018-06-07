@@ -5,7 +5,7 @@ import pandas as pd
 from collections import OrderedDict
 
 
-def _fetch_key_values_to_index(dict_, keys):
+def _fetch_key_values(dict_, keys):
     """
     Extracts the values of the keys in `keys` from `dict_` and returns them as a tuple
     """
@@ -44,7 +44,7 @@ def create_score_heatmap_from_dataframe(curve_fitted_samples, score_key):
 
 def create_dict_with_keys(dict_list, keys_to_index):
     """
-    Converts a list of dictionaries into a single dictionary with specified with `keys_to_index`.
+    Converts a list of dictionaries into a single dictionary with keys specified using `keys_to_index`.
     The specified keys in `keys_to_index` must be in each dict in `dict_list`.
 
     Parameters
@@ -62,7 +62,7 @@ def create_dict_with_keys(dict_list, keys_to_index):
     database = OrderedDict()
 
     for dict_ in dict_list:
-        new_key = _fetch_key_values_to_index(dict_, keys_to_index)
+        new_key = _fetch_key_values(dict_, keys_to_index)
         data = dict_
 
         database[new_key] = data
