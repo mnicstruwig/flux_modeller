@@ -104,6 +104,49 @@ def smooth_column(df, col, **_smooth_signal_kwargs):
     return df[col]
 
 
+def _calculate_time_step(df, time_col):
+    """
+    Calculate the timestep of  series `time_col` in dataframe `df`.
+    Parameters
+    ----------
+    df: dataframe
+        Pandas dataframe containing the timesteps
+    time_col: str
+        Column in `df` that contains the timesteps
+
+    Returns
+    -------
+    float
+        The timestep.
+    """
+
+    return np.diff(df[time_col].values)[0]
+
+
+def _calculate_time_deriv_flux_curve(df, flux_col, timestep):
+    """
+    Calculate the time-derivative of the flux curve waveform.
+
+    Parameters
+    ----------
+    df: dataframe
+        Pandas dataframe containing the flux curve
+    flux_col : str
+        Column in `df` that contains the flux linkage waveform
+    displacement_col : str
+        Column in `df` that contains the displacement of the moving magnet
+    timestep : float
+        The timestep of the waveform at `flux_col`
+
+    Returns
+    -------
+    ndarray
+        The time-derivative of the flux curve waveform
+    """
+    phi = df[flux_col].values
+    return np.gradient(phi) / timestep
+
+
 def create_training_sample(df, col, shift_peak_to_zero=True, smooth_filter=False, minmaxscale=False):
     """
     Extracts the flux-linkage waveform at `col` in `df`, and returns a dict containing this waveform, the
@@ -135,6 +178,9 @@ def create_training_sample(df, col, shift_peak_to_zero=True, smooth_filter=False
     # TODO: Implement a flag and way of flipping the raw curve, rather than hard-coded
     new_df['flux_linkage'] = -1 * df[col]
 
+    timestep = _calculate_time_step(df, 'time(s)')
+    new_df['d_flux_linkage_dt'] = _calculate_time_deriv_flux_curve(new_df, flux_col='flux_linkage', timestep=timestep)
+
     # Pass through smoothing filter
     if smooth_filter:
         new_df['flux_linkage'] = smooth_column(df=new_df, col='flux_linkage', window_length=11)
@@ -155,7 +201,7 @@ def create_training_sample(df, col, shift_peak_to_zero=True, smooth_filter=False
     dict_ = get_parameters_dict(col, winding_diameter=0.127)
     dict_['dataframe'] = new_df
     dict_['minmaxscaler'] = mms
-    dict_['timestep'] = np.diff(df['time(s)'].values)[0]
+    dict_['timestep'] = timestep
 
     return dict_
 
