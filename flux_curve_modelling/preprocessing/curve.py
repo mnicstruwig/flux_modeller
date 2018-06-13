@@ -155,6 +155,7 @@ def create_training_sample(df, col, shift_peak_to_zero=True, smooth_filter=False
     dict_ = get_parameters_dict(col, winding_diameter=0.127)
     dict_['dataframe'] = new_df
     dict_['minmaxscaler'] = mms
+    dict_['timestep'] = np.diff(df['time(s)'].values)[0]
 
     return dict_
 
