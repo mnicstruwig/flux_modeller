@@ -72,7 +72,7 @@ def insert_predicted_flux_curve(input_, X_col, curve_model):
     return df
 
 
-def insert_unscaled_flux_curve(input_, curve_col):
+def inverse_transform_dataframe_curve(input_, curve_col):
     """
     Inverse-transform / unscale a curve in column `curve_vol` in dataframe at `input_[0]` using scaler at `input_[1]
     and insert this unscaled curve into the dataframe.
