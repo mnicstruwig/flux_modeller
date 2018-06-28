@@ -3,6 +3,7 @@ Contains helper methods for making comparative plots
 """
 
 import matplotlib.pyplot as plt
+from plotnine import *
 
 
 def plot_curve_fit_comparison(func, popt, xdata, ydata):
@@ -32,7 +33,13 @@ def plot_curve_fit_comparison(func, popt, xdata, ydata):
     return y_fit
 
 
-def fast_comparison_plot(func, dict_):
+def fast_comparison_plot_from_dataframe(df, y_columns):
+    df = df.melt(value_Vars=y_columns)
+
+    p = ggplot(aes(x=''))
+
+
+def fast_curve_fit_comparison_plot(func, dict_):
     """
     A helper that allows for a fast comparison plot of a fitted curve for a known curve_fitted dictionary, using
     hard-coded values

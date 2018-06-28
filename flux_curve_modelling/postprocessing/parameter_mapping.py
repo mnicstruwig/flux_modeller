@@ -72,6 +72,26 @@ def insert_predicted_flux_curve(input_, X_col, curve_model):
     return df
 
 
+def apply_func_to_dataframe_curve(input_, curve_col, func):
+    """
+    Apply a function `func` to a curve, denoted by column-name `curve_col` in a dataframe at `input_[0]`.
+
+    Parameters
+    ----------
+    input_
+    curve_col
+    func
+
+    Returns
+    -------
+
+    """
+    df = input_[0]
+    y = df[curve_col].values
+
+    return func(y)
+
+
 def inverse_transform_dataframe_curve(input_, curve_col):
     """
     Inverse-transform / unscale a curve in column `curve_vol` in dataframe at `input_[0]` using scaler at `input_[1]
@@ -95,13 +115,42 @@ def inverse_transform_dataframe_curve(input_, curve_col):
     df = input_[0]
     scaler = input_[1]
     scaled_curve = df[curve_col].values.reshape(1, -1)
-    unscaled_curve = scaler.inverse_transform(scaled_curve)[0] # The entire array is in the first element
+    unscaled_curve = scaler.inverse_transform(scaled_curve)[0]  # The entire array is in the first element
 
     df[curve_col + '_unscaled'] = unscaled_curve
 
     return df
 
 
+def compute_score_dataframe_curves(input_, y_col, yhat_col, scorer):
+    """
+    Compute a score using `scorer` on curves given by columns `y_col` and `yhat_col` in dataframe at `input_[0]`
+
+    Parameters
+    ----------
+    input_ : list
+        input_[0] contains the dataframe containing the curves at columns `y_col` and `yhat_col`.
+    y_col : str
+        Column in the dataframe containing the ground-truth curve.
+    yhat_col : str
+        Column in the dataframe containing the predicted curve.
+    scorer : func
+        Function that computes a metric given the two curves.
+
+    Returns
+    -------
+    float
+        The score as computed by `scorer`.
+
+    """
+    df = input_[0]
+    y = df[y_col]
+    yhat = df[yhat_col]
+
+    return scorer(y, yhat)
+
+
+# TODO: Better docstring
 def compute_func_score_against_curve(input_, compute_func, scorer):
     """
     Uses `scorer` to score the quality of a curve fit with model `func` for a curve in a dataframe at `input_[0]`

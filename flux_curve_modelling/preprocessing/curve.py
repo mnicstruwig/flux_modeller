@@ -179,7 +179,6 @@ def create_training_sample(df, col, shift_peak_to_zero=True, smooth_filter=False
     new_df['flux_linkage'] = -1 * df[col]
 
     timestep = _calculate_time_step(df, 'time(s)')
-    new_df['d_flux_linkage_dt'] = _calculate_time_deriv_flux_curve(new_df, flux_col='flux_linkage', timestep=timestep)
 
     # Pass through smoothing filter
     if smooth_filter:
