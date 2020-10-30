@@ -6,6 +6,6 @@ setuptools.setup(
     author="Michael Struwig",
     author_email="mnicstruwig@gmail.com",
     description="Model flux curves",
-    packages=['flux_modeller'],
+    packages=setuptools.find_packages(),
     python_requires='>=3.7',
 )
