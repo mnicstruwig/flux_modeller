@@ -48,4 +48,4 @@ class CurveModel:
                                                   self.regressor,
                                                   self.kernel_space)
 
-        return self.x_arr, y_hat
+        return self.x_arr, y_hat.flatten()
