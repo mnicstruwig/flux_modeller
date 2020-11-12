@@ -2,79 +2,124 @@
 Defines all the helper functions for performing the curve-fit of the flux-linkage curves.
 """
 import numpy as np
-from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
-from tqdm import tqdm
-from scipy.optimize import curve_fit
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
 
 
-def fit_training_sample(func, training_sample_dict, use_bounds=True):
-    """
-    Fit a single training example to `func` using the `training_sample` dict and adds the
-    fitted function parameters and performance metrics to the dictionary once computed.
+def _gauss_rbf(x, mag=1, center=0, shape=0.003):
+    """Sample from a Gaussian radial basis function kernel.
 
     Parameters
     ----------
-    func : function
-        The function to fit to.
-    training_sample_dict : dict
-        Dictionary that contains the training sample data
-    use_bounds: {True, False}
-        Specifies whether to enforce positive and negative bounds of the parameters in `func`.
+    x : float
+        The position at which to sample from the kernel.
+    mag : float
+        The peak magnitude of the kernel.
+    center : float
+        The center of the peak of the kernel.
+    shape : float
+        The shape parameter of the kernel.
 
     Returns
     -------
-    dict
-        Dictionary containing the fitted parameters, as well as performance metrics describing the quality of the fit.
+    float
+        The value of the kernel at position `x`
+
     """
-    xdata = training_sample_dict['dataframe']['displacement(m)']
-    ydata = training_sample_dict['dataframe']['flux_linkage']
-
-    # TODO: Implement way of specifying bounds
-    if use_bounds:
-        lower_bounds = (0, 0)  # (C, a, b)
-        upper_bounds = (np.inf, np.inf)
-        bounds = (lower_bounds, upper_bounds)
-        popt, pcov = curve_fit(func, xdata, ydata, maxfev=10000, method='trf', bounds=bounds, xtol=1e-25, gtol=1e-25,
-                               loss='huber')
-    else:
-        popt, pcov = curve_fit(func, xdata, ydata, maxfev=10000, method='trf', xtol=1e-25, gtol=1e-25)
-
-    y_fit = func(xdata, *popt)
-
-    training_sample_dict['popt'] = popt
-    training_sample_dict['r2_score_curve_fit'] = r2_score(ydata, y_fit)
-    training_sample_dict['mae_score_curve_fit'] = mean_absolute_error(ydata, y_fit)
-    training_sample_dict['mse_score_curve_fit'] = mean_squared_error(ydata, y_fit)
-
-    return training_sample_dict
+    return mag*np.exp(-(x-center)**2/(2*shape**2))
 
 
-def fit_all_training_samples(func, training_samples_list, **kwargs):
-    """
-    Fit all training samples in `training_samples_list` to `func`. Adds fitted function parameters and performance
-    metrics to each sample, and returns the fitted list.
+def _build_unweighted_kernel_space(k, xs, shape):
+    """Build an unweighted kernel space.
 
     Parameters
     ----------
-    func : function
-        The function to fit to.
-    training_samples_list: list
-        List of dicts that contains the training sample data
-    **kwargs
-        Keyword arguments for `fit_training_sample`.
+    k : int
+        The number of kernels to distribute across the space.
+        Consider this a hyperparameter.
+    xs : array[float]
+        The points at which to sample each kernel.
+    shape: float
+        The shape parameter that controls the shape of the RBF kernel.
+        Consider this a hyperparameter.
 
     Returns
     -------
-    list
-        List containing dicts with the added fitted parameters and performance metrics.
+    array(len(xs), k)
+        The kernel values at each point of `xs`.
+
     """
+    try:
+        # Add two, since we remove the first and last.
+        peak_locations = np.linspace(min(xs), max(xs), k + 2)
+    except TypeError:
+        peak_locations = np.linspace(min(xs), max(xs), k.value + 2)
+    peak_locations = peak_locations[1:-1]  # Trim off the end kernels
 
-    curve_fitted_samples = []
-    use_bounds = kwargs['use_bounds']
+    kernels = []
+    for p in peak_locations:
+        kernels.append([_gauss_rbf(x, center=p, shape=shape) for x in xs])
+    kernels = np.array(kernels)
+    return kernels.T
 
-    for sample_dict in tqdm(training_samples_list):
-        trained_sample_dict = fit_training_sample(func, sample_dict, use_bounds=use_bounds)
 
-        curve_fitted_samples.append(trained_sample_dict)
+def _get_kernel_weights(kernel_space: np.ndarray,
+                        y: np.ndarray) -> np.ndarray:
+    """Determine the best kernel weights to reproduce curve `y`.
 
-    return curve_fitted_samples
+    This is calculated using Least Squares / Linear Regression.
+
+    Parameters
+    ----------
+    kernels: array(n, k)
+        The unweighted kernel space.
+    y : array[float]
+        The target curve to approximate.
+
+    Returns
+    -------
+    array(k, )[float]
+        The weights of each kernel that best recreates `y`.
+
+    """
+    kernel_weights = []
+    for y_s in y:
+        reg = LinearRegression().fit(kernel_space, y_s)
+        kernel_weights.append(reg.coef_)
+
+    return np.array(kernel_weights)
+
+
+def fit_linear_model(X, y, xs, n_kernels, kernel_shape):
+    """Train the kernel weights estimator model
+
+    Parameters
+    ----------
+    X : array(n, d)
+        The input training data consisting of `n` samples and `d` dimensions.
+    y : array(n, p)
+        The target curves, consisting of `n` curves, each consisting of `p` points.
+    xs : array(p, )
+        The `p` points that the kernel space should be sampled at.
+    n_kernels : int
+        The number of kernels to use. Consider this a hyperparameter.
+    kernel_shape: float
+        The shape parameter of the RBF kernel. Consider this a hyperparameter.
+
+    Returns
+    -------
+    reg : LinearRegression
+        The LinearRegression model that maps from `X` to the kernel weights.
+    kernel_space : array(len(xs), k)
+        The kernel values at each point of `xs`.
+    kernel_weights : array(k, )[float]
+        The weights of each kernel that best recreates `y`.
+
+    """
+    kernel_space = _build_unweighted_kernel_space(n_kernels, xs, kernel_shape)
+    kernel_weights = _get_kernel_weights(kernel_space, y)
+
+    reg = LinearRegression()
+    reg = reg.fit(X, kernel_weights)
+
+    return reg, kernel_space, kernel_weights
