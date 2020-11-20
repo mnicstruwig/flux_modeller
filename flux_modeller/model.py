@@ -1,6 +1,6 @@
 """Model module."""
 
-from flux_modeller.postprocessing.curve import get_predictions_from_linear_model
+from flux_curve_modelling.postprocessing.curve import get_predictions_from_linear_model
 from typing import Any, Tuple
 
 import cloudpickle
@@ -17,7 +17,6 @@ class CurveModel:
         self.x_arr = x_arr
         self.kernel_space = kernel_space
         self.feature_engineering_pipeline = feature_engineering_pipeline
-
 
     def save(self, path: str) -> None:
         model_package = {
@@ -48,4 +47,4 @@ class CurveModel:
                                                   self.regressor,
                                                   self.kernel_space)
 
-        return self.x_arr, y_hat.flatten()
+        return self.x_arr, y_hat

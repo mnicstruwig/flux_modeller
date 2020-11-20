@@ -7,12 +7,13 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from sklearn.preprocessing import MinMaxScaler
-from flux_curve_modelling.utilities.raw_csv_utils import get_parameters_dict
+from flux_modeller.utilities.raw_csv_utils import get_parameters_dict
+from typing import Dict, Any, List, Tuple
 
 
-def _get_peak_index(df, col, flipped=False):
+def _get_peak_index(df, col):
     """
-    Return the index of the peak of the waveform
+    Return the index of the peak of the waveform.
 
     Parameters
     ----------
@@ -27,19 +28,18 @@ def _get_peak_index(df, col, flipped=False):
     -------
     int
         The index of the peak
+
     """
     sample = df[col]
 
-    if flipped:
-        sample = -1 * sample
-
-    indexes = peakutils.indexes(sample, thres=0.2, min_dist=15)
+    indexes = peakutils.indexes(np.abs(sample), thres=0.2, min_dist=15)
     return indexes[0]
 
 
 def _shift_index_value_to_zero(df, col, index):
     """
-    Shift the value in `col` of `df` so that the value at `index` becomes zero and return the column.
+    Shift the value in column `col` of `df` so that the value at `index`
+    becomes zero and return the column.
 
     Parameters
     ----------
@@ -52,13 +52,15 @@ def _shift_index_value_to_zero(df, col, index):
 
     Returns
     -------
-    series
+    pandas series
         The shifted column
+
     """
     amount_to_shift = df.loc[index, col]
     return df[col] - amount_to_shift
 
 
+# TODO: Implement catching cases where the `window_length` is longer than the number of samples in `ydata`.
 def _smooth_signal(ydata, window_length):
     """
     Smooth a signal by convolving it with a normalized vector of length `window_length`
@@ -80,9 +82,14 @@ def _smooth_signal(ydata, window_length):
     return np.convolve(ydata, convolution_box, mode='same')
 
 
+def _smooth_flux_linkage(df, window_length):
+    df.iloc[:, 1] = _smooth_signal(df.iloc[:, 1].values, window_length=window_length)
+    return df
+
+
 def smooth_column(df, col, **_smooth_signal_kwargs):
     """
-    Smooth a series from `col` in a `df` and return the smoothed column.
+    Smooth a series in column `col` in a `df` and return the dataframe.
 
     Parameters
     ----------
@@ -92,21 +99,22 @@ def smooth_column(df, col, **_smooth_signal_kwargs):
         The name of the column in `df` that must be smoothed.
     **_smooth_signal_kwargs
         Keyword arguments to be passed to `_smooth_signal`.
+
     Returns
     -------
-    series
-        The smoothed column
+    dataframe
+        return the dataframe containing the smoothed_column
+
     """
     window_length = _smooth_signal_kwargs['window_length']
-
     df[col] = _smooth_signal(df[col], window_length)
-
-    return df[col]
+    return df
 
 
 def _calculate_time_step(df, time_col):
     """
     Calculate the timestep of  series `time_col` in dataframe `df`.
+
     Parameters
     ----------
     df: dataframe
@@ -123,120 +131,115 @@ def _calculate_time_step(df, time_col):
     return np.diff(df[time_col].values)[0]
 
 
-def _calculate_time_deriv_flux_curve(df, flux_col, timestep):
+def create_training_sample(df: pd.DataFrame,
+                           col: str,
+                           shift_peak_to_zero: bool=True,
+                           smooth_filter: bool=False) -> Dict[str, Any]:
     """
-    Calculate the time-derivative of the flux curve waveform.
-
-    Parameters
-    ----------
-    df: dataframe
-        Pandas dataframe containing the flux curve
-    flux_col : str
-        Column in `df` that contains the flux linkage waveform
-    displacement_col : str
-        Column in `df` that contains the displacement of the moving magnet
-    timestep : float
-        The timestep of the waveform at `flux_col`
-
-    Returns
-    -------
-    ndarray
-        The time-derivative of the flux curve waveform
-    """
-    phi = df[flux_col].values
-    return np.gradient(phi) / timestep
-
-
-def create_training_sample(df, col, shift_peak_to_zero=True, smooth_filter=False, minmaxscale=False):
-    """
-    Extracts the flux-linkage waveform at `col` in `df`, and returns a dict containing this waveform, the
-    corresponding magnet displacement and the design parameters that produced the waveform.
+    Extract the flux-linkage waveform at `col` in `df`, and return a dict
+    containing this waveform, the corresponding magnet displacement and the
+    design parameters that produced the waveform.
 
     Parameters
     ----------
     df : dataframe
         The dataframe containing the raw Maxwell data
     col : str
-        The column name in `df` that contains the flux-linkage waveform to be extracted.
-    shift_peak_to_zero : {True, False}
+        The column name in `df` that contains the flux-linkage waveform to be
+        extracted.
+    shift_peak_to_zero : bool
         Whether to shift the peak in df[col] to zero.
-    smooth_filter : {False, True}
+        Default value is True.
+    smooth_filter : bool
         Whether to smooth the flux-linkage waveform at df[col]
-    minmaxscale : {False, True}
-        Whether to apply a MinMaxScaler to the curve (i.e. scale curve to min=0 and max=1). If True, will also append
-        to the training sample dict under the 'minmaxscaler' key for later inverse-transformation back to original
-        curve.
+        Default value is False.
 
     Returns
     -------
     dict
-        Dictionary containing the new extracted dataframe (consisting of the magnet displacement and the flux-linkage),
-        and the design parameters that produced the waveform.
+        Dictionary containing the new extracted dataframe (consisting of the
+        magnet displacement and the flux-linkage), and the design parameters
+        that produced the waveform.
+
     """
     new_df = pd.DataFrame()
     new_df['displacement(m)'] = df['displacement(m)']
-    # TODO: Implement a flag and way of flipping the raw curve, rather than hard-coded
-    new_df['flux_linkage'] = -1 * df[col]
+    new_df['flux_linkage'] = np.abs(df[col]) # type: ignore
 
     timestep = _calculate_time_step(df, 'time(s)')
 
-    # Pass through smoothing filter
     if smooth_filter:
-        new_df['flux_linkage'] = smooth_column(df=new_df, col='flux_linkage', window_length=11)
+        new_df = smooth_column(df=new_df, col='flux_linkage', window_length=11)
 
-    # Shift peak of curve to zero
     if shift_peak_to_zero:
-        index = _get_peak_index(new_df, 'flux_linkage', flipped=False)
+        index = _get_peak_index(new_df, 'flux_linkage')
         new_df['displacement(m)'] = _shift_index_value_to_zero(new_df, 'displacement(m)', index)
 
-    # MinMaxScaling
-    mms = None
-    if minmaxscale:
-        mms = MinMaxScaler()
-        y_temp = new_df['flux_linkage'].values
-        y_temp = y_temp.reshape(-1, 1)
-        new_df['flux_linkage'] = mms.fit_transform(y_temp)
 
-    dict_ = get_parameters_dict(col, winding_diameter=0.127)
+    dict_: Dict[str, Any] = get_parameters_dict(col, winding_diameter=0.127) # TODO: Handle this hard-coding
     dict_['dataframe'] = new_df
-    dict_['minmaxscaler'] = mms
     dict_['timestep'] = timestep
-
     return dict_
 
 
-def create_all_training_samples(df, waveform_columns, **kwargs):
+def create_sklearn_training_data(training_samples: List[Dict]) -> Tuple[np.ndarray, np.ndarray]:
+    """Create training dataset for passing to Scikit-learn models.
+
+    Parameters
+    ----------
+    training_samples: List[Dict]
+        The list of training samples generated by `create_all_training_samples`.
+
+    Returns
+    -------
+    X : array(n, d)
+        The input data of the scikit-learn model.
+    y : array(n, p)
+        The target data of the scikit-learn model.
+
+
     """
-    Extracts the flux-linkage waveform at `col` in `df`, and returns a dict containing this waveform, the
-    corresponding magnet displacement and the design parameters that produced the waveform.
+    X = []
+    y = []
+
+    for sample in training_samples:
+        X.append(np.array([sample['winding_num_z'], sample['winding_num_r']]))
+        y.append(sample['dataframe']['flux_linkage'].values)
+    return np.array(X), np.array(y)
+
+
+def create_training_dataset(df, waveform_columns, **kwargs):
+    """
+    Extracts the flux-linkage waveform at `col` in `df`, and returns a dict
+    containing this waveform, the corresponding magnet displacement and the
+    design parameters that produced the waveform.
 
     Parameters
     ----------
     df : dataframe
         The dataframe containing the raw Maxwell data
     waveform_columns : str
-        The column name in `df` that contains the flux-linkage waveform to be extracted.
+        The column name in `df` that contains the flux-linkage waveform to be
+        extracted.
     **kwargs
-        Keyword arguments for `create_training_sample`.
+        Keyword arguments passed to `create_training_sample` function.
 
     Returns
     -------
     list of dicts
-        List tof dicts containing the extracted dataframes (consisting of the magnet displacement and the flux-linkage),
-        and the design parameters that produced each respective waveform.
-    """
-    # TODO: Implement better kwarg handling
-    shift_peak_to_zero = kwargs['shift_peak_to_zero']
-    smooth_filter = kwargs['smooth_filter']
-    minmaxscale = kwargs['minmaxscale']
+        List of dicts containing the extracted dataframes (consisting of the
+        magnet displacement and the flux-linkage), and the design parameters
+        that produced each respective waveform.
 
+    """
     training_samples = []
     for col in tqdm(waveform_columns):
-        training_samples.append(create_training_sample(df,
-                                                       col,
-                                                       shift_peak_to_zero=shift_peak_to_zero,
-                                                       smooth_filter=smooth_filter,
-                                                       minmaxscale=minmaxscale)
-                                )
+        training_samples.append(
+            create_training_sample(
+                df,
+                col,
+                **kwargs
+            )
+        )
 
     return training_samples
