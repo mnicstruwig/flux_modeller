@@ -1,12 +1,12 @@
 """Model module."""
 
-from flux_curve_modelling.postprocessing.curve import get_predictions_from_linear_model
+from flux_modeller.postprocessing.curve import get_predictions_from_linear_model
 from typing import Any, Tuple
 
 import cloudpickle
 import numpy as np
 
-
+# TODO: Docstring
 class CurveModel:
     def __init__(self,
                  regressor: Any,
