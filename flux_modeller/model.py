@@ -62,7 +62,7 @@ class CurveModel:
             feature_engineering_pipeline=model_package['feature_engineering']
         )
 
-    def predict_curve(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def predict_curves(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         X_transformed = self.feature_engineering_pipeline.fit_transform(X)
         y_hat = self.get_predictions_from_linear_model(X_transformed,
                                                        self.regressor,
