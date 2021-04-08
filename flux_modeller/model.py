@@ -38,6 +38,8 @@ class CurveModel:
         self.x_arr = x_arr
         self.kernel_space = kernel_space
         self.feature_engineering_pipeline = feature_engineering_pipeline
+    def __repr__(self):
+        return f'CurveModel(regressor={self.regressor}, x_arr.shape={self.x_arr.shape}, kernel_space.shape={self.kernel_space.shape}, feature_engineering_pipeline={self.feature_engineering_pipeline})'  # noqa
 
     def save(self, path: str) -> None:
         model_package = {
@@ -62,7 +64,7 @@ class CurveModel:
             feature_engineering_pipeline=model_package['feature_engineering']
         )
 
-    def predict_curve(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def predict_curves(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         X_transformed = self.feature_engineering_pipeline.fit_transform(X)
         y_hat = self.get_predictions_from_linear_model(X_transformed,
                                                        self.regressor,
