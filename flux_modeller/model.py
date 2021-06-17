@@ -35,7 +35,7 @@ class CurveModel:
 
         """
         self.regressor = regressor
-        self.x_arr = x_arr
+        self.x_arr = x_arr if isinstance(x_arr, np.ndarray) else np.array(x_arr)
         self.kernel_space = kernel_space
         self.feature_engineering_pipeline = feature_engineering_pipeline
 
