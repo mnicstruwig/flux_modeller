@@ -182,7 +182,7 @@ def create_training_sample(df: pd.DataFrame,
     return dict_
 
 
-def create_sklearn_training_data(training_samples: List[Dict]) -> Tuple[np.ndarray, np.ndarray]:
+def create_sklearn_inputs_and_targets(training_samples: List[Dict]) -> Tuple[np.ndarray, np.ndarray]:
     """Create training dataset for passing to Scikit-learn models.
 
     Parameters

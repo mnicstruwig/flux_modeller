@@ -38,6 +38,8 @@ class CurveModel:
         self.x_arr = x_arr if isinstance(x_arr, np.ndarray) else np.array(x_arr)
         self.kernel_space = kernel_space
         self.feature_engineering_pipeline = feature_engineering_pipeline
+    def __repr__(self):
+        return f'CurveModel(regressor={self.regressor}, x_arr.shape={self.x_arr.shape}, kernel_space.shape={self.kernel_space.shape}, feature_engineering_pipeline={self.feature_engineering_pipeline})'  # noqa
 
     def save(self, path: str) -> None:
         model_package = {
