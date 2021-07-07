@@ -1,11 +1,13 @@
 """
-Helper functions for predicting the flux-curve model parameters from the device design parameters.
+Helper functions for predicting the flux-curve model parameters from the device
+design parameters.
 """
 
 
 def predict_on_sample_dict(trained_models, sample, input_key="x"):
     """
-    Predict the targets for input data in dict `sample` at key `input_key` using each model in `trained_models`.
+    Predict the targets for input data in dict `sample` at key `input_key` using
+    each model in `trained_models`.
 
     Parameters
     ----------
@@ -34,7 +36,8 @@ def predict_update_on_dict_list(
     trained_models, dict_list, input_key="x", prediction_key="y_pred"
 ):
     """
-    Predict the targets for input data in `dict_list` at key `input_key` using each model in `trained_models`.
+    Predict the targets for input data in `dict_list` at key `input_key` using
+    each model in `trained_models`.
 
     Parameters
     ----------
