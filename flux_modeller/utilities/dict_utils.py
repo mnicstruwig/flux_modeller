@@ -61,7 +61,7 @@ def upsert_dict_list(dict_list, data, key):
 
     for i, x in enumerate(data):
         sample = dict_list[i]  # Take original sample
-        sample[key] = data[i:i + 1]  # Insert data
+        sample[key] = data[i : i + 1]  # Insert data
 
         dict_list[i] = sample  # Reassign modified sample
     return dict_list

@@ -3,7 +3,7 @@ Helper functions for predicting the flux-curve model parameters from the device 
 """
 
 
-def predict_on_sample_dict(trained_models, sample, input_key='x'):
+def predict_on_sample_dict(trained_models, sample, input_key="x"):
     """
     Predict the targets for input data in dict `sample` at key `input_key` using each model in `trained_models`.
 
@@ -30,7 +30,9 @@ def predict_on_sample_dict(trained_models, sample, input_key='x'):
     return y_pred_arr
 
 
-def predict_update_on_dict_list(trained_models, dict_list, input_key='x', prediction_key='y_pred'):
+def predict_update_on_dict_list(
+    trained_models, dict_list, input_key="x", prediction_key="y_pred"
+):
     """
     Predict the targets for input data in `dict_list` at key `input_key` using each model in `trained_models`.
 
@@ -53,7 +55,9 @@ def predict_update_on_dict_list(trained_models, dict_list, input_key='x', predic
     """
 
     for i, sample in enumerate(dict_list):
-        sample[prediction_key] = predict_on_sample_dict(trained_models, sample, input_key)
+        sample[prediction_key] = predict_on_sample_dict(
+            trained_models, sample, input_key
+        )
         dict_list[i] = sample
 
     return dict_list

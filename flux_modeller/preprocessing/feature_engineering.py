@@ -66,26 +66,36 @@ def engineer_features(additional_features, **kwargs):
     Dict
         A dictionary of engineered features, with keys as in `additional_features`.
     """
-    winding_num_r = kwargs['winding_num_r']
-    winding_num_z = kwargs['winding_num_z']
-    winding_diameter = kwargs['winding_diameter']
+    winding_num_r = kwargs["winding_num_r"]
+    winding_num_z = kwargs["winding_num_z"]
+    winding_diameter = kwargs["winding_diameter"]
 
     features = dict()
 
-    if 'coil_height' in additional_features:
-        features['coil_height'] = _calculate_coil_height(winding_num_z, winding_diameter)
-    if 'coil_width' in additional_features:
-        features['coil_width'] = _calculate_coil_width(winding_num_r, winding_diameter)
-    if 'coil_area' in additional_features:
-        features['coil_area'] = _calculate_coil_area(winding_num_z, winding_num_r, winding_diameter)
-    if 'N' in additional_features:
-        features['N'] = _calculate_n(winding_num_z, winding_num_r)
-    if 'coil_density' in additional_features:
-        features['coil_density'] = _calculate_coil_density(winding_num_z, winding_num_r, winding_diameter)
-    if 'w_to_h_ratio' in additional_features:
-        features['w_to_h_ratio'] = _calculate_width_to_height_ratio(winding_num_z, winding_num_r)
-    if 'diagonal_length' in additional_features:
-        features['diagonal_length'] = _calculate_coil_diagonal_length(winding_num_z, winding_num_r, winding_diameter)
+    if "coil_height" in additional_features:
+        features["coil_height"] = _calculate_coil_height(
+            winding_num_z, winding_diameter
+        )
+    if "coil_width" in additional_features:
+        features["coil_width"] = _calculate_coil_width(winding_num_r, winding_diameter)
+    if "coil_area" in additional_features:
+        features["coil_area"] = _calculate_coil_area(
+            winding_num_z, winding_num_r, winding_diameter
+        )
+    if "N" in additional_features:
+        features["N"] = _calculate_n(winding_num_z, winding_num_r)
+    if "coil_density" in additional_features:
+        features["coil_density"] = _calculate_coil_density(
+            winding_num_z, winding_num_r, winding_diameter
+        )
+    if "w_to_h_ratio" in additional_features:
+        features["w_to_h_ratio"] = _calculate_width_to_height_ratio(
+            winding_num_z, winding_num_r
+        )
+    if "diagonal_length" in additional_features:
+        features["diagonal_length"] = _calculate_coil_diagonal_length(
+            winding_num_z, winding_num_r, winding_diameter
+        )
 
     return features
 
@@ -115,9 +125,9 @@ def get_x_y_from_dict_list(dict_list, additional_features):
 
     for sample in dict_list:
         x = [
-            sample['winding_diameter'],
-            sample['winding_num_r'],
-            sample['winding_num_z']
+            sample["winding_diameter"],
+            sample["winding_num_r"],
+            sample["winding_num_z"],
         ]
 
         if additional_features is not None:
@@ -127,6 +137,6 @@ def get_x_y_from_dict_list(dict_list, additional_features):
                 x.append(value)
 
         X.append(x)
-        y.append(sample['popt'])
+        y.append(sample["popt"])
 
     return np.array(X), np.array(y)

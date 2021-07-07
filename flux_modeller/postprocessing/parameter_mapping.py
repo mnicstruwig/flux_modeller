@@ -3,8 +3,13 @@ Helper functions for postprocessing predictions for the parameter mapping from t
 flux-curve model parameters
 """
 import numpy as np
-from sklearn.metrics import mean_squared_error, explained_variance_score, mean_squared_log_error, mean_absolute_error, \
-    r2_score
+from sklearn.metrics import (
+    mean_squared_error,
+    explained_variance_score,
+    mean_squared_log_error,
+    mean_absolute_error,
+    r2_score,
+)
 
 
 def inverse_normalize(input_, fitted_scaler):
@@ -68,7 +73,7 @@ def insert_predicted_flux_curve(input_, X_col, curve_model):
 
     predicted_curve = curve_model(X, *pred_popt)
 
-    df['flux_linkage_pred'] = predicted_curve
+    df["flux_linkage_pred"] = predicted_curve
     return df
 
 
@@ -115,9 +120,11 @@ def inverse_transform_dataframe_curve(input_, curve_col):
     df = input_[0]
     scaler = input_[1]
     scaled_curve = df[curve_col].values.reshape(1, -1)
-    unscaled_curve = scaler.inverse_transform(scaled_curve)[0]  # The entire array is in the first element
+    unscaled_curve = scaler.inverse_transform(scaled_curve)[
+        0
+    ]  # The entire array is in the first element
 
-    df[curve_col + '_unscaled'] = unscaled_curve
+    df[curve_col + "_unscaled"] = unscaled_curve
 
     return df
 
@@ -157,8 +164,8 @@ def compute_func_score_against_curve(input_, compute_func, scorer):
     and any curve model parameters at `input_[1]`
     """
     df = input_[0]  # Original xdata
-    xdata = df['displacement(m)']
-    ydata = df['flux_linkage']
+    xdata = df["displacement(m)"]
+    ydata = df["flux_linkage"]
 
     popt = input_[1]  # Parameters for func
 

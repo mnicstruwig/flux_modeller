@@ -38,7 +38,9 @@ def train_regressor_per_output(X, y, regressor, **regressor_kwargs):
     return model_list
 
 
-def cross_validation_regressor_per_output(X, y, regressor, cv, give_mean_score=True, **regressor_kwargs):
+def cross_validation_regressor_per_output(
+    X, y, regressor, cv, give_mean_score=True, **regressor_kwargs
+):
     """
     Performs cross-validation, training a single regressor per element in the target 'y', using 'X' as input.
 

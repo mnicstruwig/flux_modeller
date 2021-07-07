@@ -57,6 +57,3 @@ def normalize_x_y(X, y, scaler, **scaler_kwargs):
     y, ss_y = normalize(y, scaler, **scaler_kwargs)
 
     return X, ss_X, y, ss_y
-
-
-

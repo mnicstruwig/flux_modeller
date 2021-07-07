@@ -7,5 +7,5 @@ setuptools.setup(
     author_email="mnicstruwig@gmail.com",
     description="Model flux curves",
     packages=setuptools.find_packages(),
-    python_requires='>=3.7',
+    python_requires=">=3.7",
 )

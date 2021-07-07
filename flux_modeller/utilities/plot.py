@@ -27,8 +27,8 @@ def plot_curve_fit_comparison(func, popt, xdata, ydata):
         The output of `func`, i.e. the predicted y-values that are estimated using `xdata`.
     """
     y_fit = func(xdata, *popt)
-    plt.plot(xdata, ydata, 'r', label='original')
-    plt.plot(xdata, y_fit, 'b', label='curve fit')
+    plt.plot(xdata, ydata, "r", label="original")
+    plt.plot(xdata, y_fit, "b", label="curve fit")
     plt.legend()
     return y_fit
 
@@ -36,7 +36,7 @@ def plot_curve_fit_comparison(func, popt, xdata, ydata):
 def fast_comparison_plot_from_dataframe(df, y_columns):
     df = df.melt(value_Vars=y_columns)
 
-    p = ggplot(aes(x=''))
+    p = ggplot(aes(x=""))
 
 
 def fast_curve_fit_comparison_plot(func, dict_):
@@ -52,8 +52,9 @@ def fast_curve_fit_comparison_plot(func, dict_):
         A single dictionary containing the parameters of `func` and an extracted dataframe containing the
          flux-linkage curve and magnet displacement
     """
-    plot_curve_fit_comparison(func=func,
-                              popt=dict_['popt'],
-                              xdata=dict_['dataframe']['displacement(m)'],
-                              ydata=dict_['dataframe']['flux_linkage']
-                              )
+    plot_curve_fit_comparison(
+        func=func,
+        popt=dict_["popt"],
+        xdata=dict_["dataframe"]["displacement(m)"],
+        ydata=dict_["dataframe"]["flux_linkage"],
+    )

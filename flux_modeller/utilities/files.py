@@ -21,20 +21,20 @@ def _parse_value_to_string(tup):
     str
         The formatted string. Values are enclosed in square brackets and separated with dashes (if more than 1).
     """
-    output_string = ''
+    output_string = ""
 
     # TODO: Thing about how to do this parsing again
     if isinstance(tup, tuple):
         if len(tup) == 3:
-            output_string = output_string + '[{}'.format(tup[0])
-            output_string = output_string + '-{}'.format(tup[1])
-            output_string = output_string + '-{}]'.format(tup[2])
+            output_string = output_string + "[{}".format(tup[0])
+            output_string = output_string + "-{}".format(tup[1])
+            output_string = output_string + "-{}]".format(tup[2])
         elif len(tup) == 2:
-            output_string = output_string + '[{}'.format(tup[0])
-            output_string = output_string + '-{}]'.format(tup[1])
+            output_string = output_string + "[{}".format(tup[0])
+            output_string = output_string + "-{}]".format(tup[1])
 
         return output_string
-    return '[{}]'.format(tup)
+    return "[{}]".format(tup)
 
 
 def generate_file_name(name, extension, **var_kwargs):
@@ -56,14 +56,20 @@ def generate_file_name(name, extension, **var_kwargs):
     -------
     The formatted filename
     """
-    filename = '{name}'.format(name=name)
+    filename = "{name}".format(name=name)
 
     if var_kwargs is not None:
         for key, value in var_kwargs.items():
-            filename = filename + '-{key}'.format(key=key) + '{value}'.format(value=_parse_value_to_string(value))
+            filename = (
+                filename
+                + "-{key}".format(key=key)
+                + "{value}".format(value=_parse_value_to_string(value))
+            )
 
     timestamp = time.time()
-    dt = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d[%H.%M.%S]')
-    filename = filename + '-{datetime}'.format(datetime=dt) + '.{ext}'.format(ext=extension)
+    dt = datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d[%H.%M.%S]")
+    filename = (
+        filename + "-{datetime}".format(datetime=dt) + ".{ext}".format(ext=extension)
+    )
 
     return filename

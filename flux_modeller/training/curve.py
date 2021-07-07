@@ -26,7 +26,7 @@ def _gauss_rbf(x, mag=1, center=0, shape=0.003):
         The value of the kernel at position `x`
 
     """
-    return mag*np.exp(-(x-center)**2/(2*shape**2))
+    return mag * np.exp(-((x - center) ** 2) / (2 * shape ** 2))
 
 
 def _build_unweighted_kernel_space(k, xs, mag, shape):
@@ -65,8 +65,7 @@ def _build_unweighted_kernel_space(k, xs, mag, shape):
     return kernels.T
 
 
-def _get_kernel_weights(kernel_space: np.ndarray,
-                        y: np.ndarray) -> np.ndarray:
+def _get_kernel_weights(kernel_space: np.ndarray, y: np.ndarray) -> np.ndarray:
     """Determine the best kernel weights to reproduce curve `y`.
 
     This is calculated using Least Squares / Linear Regression.
@@ -121,10 +120,7 @@ def fit_linear_model(X, y, xs, n_kernels, kernel_magnitude, kernel_shape):
 
     """
     kernel_space = _build_unweighted_kernel_space(
-        k=n_kernels,
-        xs=xs,
-        mag=kernel_magnitude,
-        shape=kernel_shape
+        k=n_kernels, xs=xs, mag=kernel_magnitude, shape=kernel_shape
     )
     kernel_weights = _get_kernel_weights(kernel_space, y)
 

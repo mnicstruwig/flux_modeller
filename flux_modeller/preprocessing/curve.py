@@ -79,7 +79,7 @@ def _smooth_signal(ydata, window_length):
     """
     convolution_box = np.ones(window_length) / window_length
 
-    return np.convolve(ydata, convolution_box, mode='same')
+    return np.convolve(ydata, convolution_box, mode="same")
 
 
 def _smooth_flux_linkage(df, window_length):
@@ -106,7 +106,7 @@ def smooth_column(df, col, **_smooth_signal_kwargs):
         return the dataframe containing the smoothed_column
 
     """
-    window_length = _smooth_signal_kwargs['window_length']
+    window_length = _smooth_signal_kwargs["window_length"]
     df[col] = _smooth_signal(df[col], window_length)
     return df
 
@@ -131,10 +131,12 @@ def _calculate_time_step(df, time_col):
     return np.diff(df[time_col].values)[0]
 
 
-def create_training_sample(df: pd.DataFrame,
-                           col: str,
-                           shift_peak_to_zero: bool=True,
-                           smooth_filter: bool=False) -> Dict[str, Any]:
+def create_training_sample(
+    df: pd.DataFrame,
+    col: str,
+    shift_peak_to_zero: bool = True,
+    smooth_filter: bool = False,
+) -> Dict[str, Any]:
     """
     Extract the flux-linkage waveform at `col` in `df`, and return a dict
     containing this waveform, the corresponding magnet displacement and the
@@ -163,26 +165,31 @@ def create_training_sample(df: pd.DataFrame,
 
     """
     new_df = pd.DataFrame()
-    new_df['displacement(m)'] = df['displacement(m)']
-    new_df['flux_linkage'] = np.abs(df[col]) # type: ignore
+    new_df["displacement(m)"] = df["displacement(m)"]
+    new_df["flux_linkage"] = np.abs(df[col])  # type: ignore
 
-    timestep = _calculate_time_step(df, 'time(s)')
+    timestep = _calculate_time_step(df, "time(s)")
 
     if smooth_filter:
-        new_df = smooth_column(df=new_df, col='flux_linkage', window_length=11)
+        new_df = smooth_column(df=new_df, col="flux_linkage", window_length=11)
 
     if shift_peak_to_zero:
-        index = _get_peak_index(new_df, 'flux_linkage')
-        new_df['displacement(m)'] = _shift_index_value_to_zero(new_df, 'displacement(m)', index)
+        index = _get_peak_index(new_df, "flux_linkage")
+        new_df["displacement(m)"] = _shift_index_value_to_zero(
+            new_df, "displacement(m)", index
+        )
 
-
-    dict_: Dict[str, Any] = get_parameters_dict(col, winding_diameter=0.127) # TODO: Handle this hard-coding
-    dict_['dataframe'] = new_df
-    dict_['timestep'] = timestep
+    dict_: Dict[str, Any] = get_parameters_dict(
+        col, winding_diameter=0.127
+    )  # TODO: Handle this hard-coding
+    dict_["dataframe"] = new_df
+    dict_["timestep"] = timestep
     return dict_
 
 
-def create_sklearn_inputs_and_targets(training_samples: List[Dict]) -> Tuple[np.ndarray, np.ndarray]:
+def create_sklearn_inputs_and_targets(
+    training_samples: List[Dict],
+) -> Tuple[np.ndarray, np.ndarray]:
     """Create training dataset for passing to Scikit-learn models.
 
     Parameters
@@ -203,8 +210,8 @@ def create_sklearn_inputs_and_targets(training_samples: List[Dict]) -> Tuple[np.
     y = []
 
     for sample in training_samples:
-        X.append(np.array([sample['winding_num_z'], sample['winding_num_r']]))
-        y.append(sample['dataframe']['flux_linkage'].values)
+        X.append(np.array([sample["winding_num_z"], sample["winding_num_r"]]))
+        y.append(sample["dataframe"]["flux_linkage"].values)
     return np.array(X), np.array(y)
 
 
@@ -234,12 +241,6 @@ def create_training_dataset(df, waveform_columns, **kwargs):
     """
     training_samples = []
     for col in tqdm(waveform_columns):
-        training_samples.append(
-            create_training_sample(
-                df,
-                col,
-                **kwargs
-            )
-        )
+        training_samples.append(create_training_sample(df, col, **kwargs))
 
     return training_samples
