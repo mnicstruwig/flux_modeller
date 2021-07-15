@@ -1,14 +1,15 @@
 """
-This file contains the preprocessing methods for the raw flux-linkage data that is exported from ANSYS Maxwell.
+This file contains the preprocessing methods for the raw flux-linkage data that
+is exported from ANSYS Maxwell.
 """
 
-import peakutils
+from typing import Any, Dict, List, Tuple
+
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
-from sklearn.preprocessing import MinMaxScaler
+import peakutils
 from flux_modeller.utilities.raw_csv_utils import get_parameters_dict
-from typing import Dict, Any, List, Tuple
+from tqdm import tqdm
 
 
 def _get_peak_index(df, col):
@@ -60,7 +61,8 @@ def _shift_index_value_to_zero(df, col, index):
     return df[col] - amount_to_shift
 
 
-# TODO: Implement catching cases where the `window_length` is longer than the number of samples in `ydata`.
+# TODO: Implement catching cases where the `window_length` is longer than the
+# number of samples in `ydata`.
 def _smooth_signal(ydata, window_length):
     """
     Smooth a signal by convolving it with a normalized vector of length `window_length`
