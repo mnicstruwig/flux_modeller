@@ -19,7 +19,8 @@ def _parse_value_to_string(tup):
     Returns
     -------
     str
-        The formatted string. Values are enclosed in square brackets and separated with dashes (if more than 1).
+        The formatted string. Values are enclosed in square brackets and
+        separated with dashes (if more than 1).
     """
     output_string = ""
 
@@ -49,8 +50,9 @@ def generate_file_name(name, extension, **var_kwargs):
     extension : str
         The extension to use for the file
     **var_kwargs
-        Keyword arguments with tuple values where the keyword will be used to label the variable.
-        eg. variable_name = (1,5,20), which will append `variable_name[1-5-20]` to the filename.
+        Keyword arguments with tuple values where the keyword will be used to
+        label the variable.  eg. variable_name = (1,5,20), which will append
+        `variable_name[1-5-20]` to the filename.
 
     Returns
     -------
