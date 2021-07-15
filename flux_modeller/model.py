@@ -10,6 +10,7 @@ import numpy as np
 # TODO: Use this class to train a curve model as well.
 class CurveModel:
     """Model a series of flux curves."""
+
     def __init__(
         self,
         regressor: Any,
