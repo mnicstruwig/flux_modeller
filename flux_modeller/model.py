@@ -5,9 +5,11 @@ from typing import Any, Tuple
 import cloudpickle
 import numpy as np
 
+
 # TODO: Write method docstrings.
 # TODO: Use this class to train a curve model as well.
 class CurveModel:
+    """Model a series of flux curves."""
     def __init__(
         self,
         regressor: Any,
