@@ -1,9 +1,8 @@
 """
-Defines all the helper functions for performing the curve-fit of the flux-linkage curves.
+Module for training the flux curve model
 """
 import numpy as np
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
 
 
 def _gauss_rbf(x, mag=1, center=0, shape=0.003):

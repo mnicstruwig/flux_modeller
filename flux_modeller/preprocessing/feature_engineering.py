@@ -50,8 +50,8 @@ def _calculate_coil_diagonal_length(winding_num_z, winding_num_r, winding_diamet
 
 def engineer_features(additional_features, **kwargs):
     """
-    Engineers a number of features specified in `additional_features` for a *single* sample
-    from values passed with `kwargs`.
+    Engineers a number of features specified in `additional_features` for a
+    *single* sample from values passed with `kwargs`.
 
     Parameters
     ----------
@@ -102,13 +102,15 @@ def engineer_features(additional_features, **kwargs):
 
 def get_x_y_from_dict_list(dict_list, additional_features):
     """
-    Extract the training input `X` and training target `y` from dicts in `curve_fitted_samples`
-    with additional features engineered, specified with `additional_features`.
+    Extract the training input `X` and training target `y` from dicts in
+    `curve_fitted_samples` with additional features engineered, specified with
+    `additional_features`.
 
     Parameters
     ----------
     dict_list : list
-        List of dicts containing the design parameters and fitted model parameters of the FEA flux curves
+        List of dicts containing the design parameters and fitted model
+        parameters of the FEA flux curves
     additional_features : list
         List of strings specifying which additional features must be engineered.
 
