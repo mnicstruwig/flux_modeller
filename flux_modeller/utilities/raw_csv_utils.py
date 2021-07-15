@@ -1,4 +1,4 @@
-from typing import Dict, Any, Union
+from typing import Dict
 
 
 def scrape_parameters(column_name: str) -> Dict[str, float]:
@@ -26,8 +26,8 @@ def scrape_parameters(column_name: str) -> Dict[str, float]:
 
 def get_parameters_dict(column_name: str, winding_diameter: float) -> Dict[str, float]:
     """
-    Create a dictionary containing parameters by scraping the column name output by ANSYS Maxwell, and augmenting with
-    `winding_diameter`.
+    Create a dictionary containing parameters by scraping the column name output
+    by ANSYS Maxwell, and augmenting with `winding_diameter`.
 
     Parameters
     ----------
